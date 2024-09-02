@@ -4,41 +4,42 @@
 [Route("api/[controller]")]
 public class ProfilesController : ControllerBase
 {
-    private readonly ISessionFactory _sessionFactory;
+    private static ISessionFactory _sessionFactory;
+    private static NHibernate.ISession _session;
 
     public ProfilesController()
     {
-        _sessionFactory = NHibernateHelper.CreateSessionFactory();
+        if (_sessionFactory == null)
+        {
+            _sessionFactory = NHibernateHelper.CreateSessionFactory();
+            _session = NHibernateHelper.GetCurrentSession();
+        }
     }
 
-    // Tüm profilleri listeleyen uç nokta
     [HttpGet]
     [Route("")]
     public IActionResult GetProfiles()
     {
-        using (var session = _sessionFactory.OpenSession())
-        using (var transaction = session.BeginTransaction())
+        using (var transaction = _session.BeginTransaction())
         {
-            // Tüm profilleri sorgulama
-            var profiles = session.Query<CrdCardMiscAuthProfileDef>().ToList();
-            transaction.Commit(); // Sorgunun sonunda işlemi onayla (commit)
+            var profiles = _session.Query<CrdCardMiscAuthProfileDef>().ToList();
+            transaction.Commit();
             return Ok(profiles);
         }
     }
 
-
-    // Belirli bir id'ye göre profil getiren uç nokta
     [HttpGet]
     [Route("{id}")]
     public IActionResult GetProfileById(Guid id)
     {
-        using (var session = _sessionFactory.OpenSession())
+        using (var transaction = _session.BeginTransaction())
         {
-            var profile = session.Get<CrdCardMiscAuthProfileDef>(id);
+            var profile = _session.Get<CrdCardMiscAuthProfileDef>(id);
             if (profile == null)
             {
                 return NotFound();
             }
+            transaction.Commit();
             return Ok(profile);
         }
     }
@@ -46,8 +47,7 @@ public class ProfilesController : ControllerBase
     [HttpPost]
     public IActionResult CreateProfile([FromBody] CreateProfileRequest request)
     {
-        using (var session = _sessionFactory.OpenSession())
-        using (var transaction = session.BeginTransaction())
+        using (var transaction = _session.BeginTransaction())
         {
             var profile = new CrdCardMiscAuthProfileDef
             {
@@ -66,7 +66,7 @@ public class ProfilesController : ControllerBase
 
             profile.CrdCardMiscAuthProfileDet = profileDetail;
 
-            session.Save(profile);
+            _session.Save(profile);
             transaction.Commit();
 
             return Ok(profile);
