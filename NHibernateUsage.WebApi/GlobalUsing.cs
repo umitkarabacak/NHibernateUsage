@@ -1,1 +1,10 @@
-﻿global using Microsoft.AspNetCore.Mvc;
+﻿global using FluentNHibernate.Cfg;
+global using FluentNHibernate.Cfg.Db;
+global using FluentNHibernate.Mapping;
+global using Microsoft.AspNetCore.Mvc;
+global using NHibernate;
+global using NHibernate.Tool.hbm2ddl;
+global using NHibernateUsage.WebApi.Entities;
+global using NHibernateUsage.WebApi.Extensions;
+global using NHibernateUsage.WebApi.Mappings;
+global using NHibernateUsage.WebApi.Models;
