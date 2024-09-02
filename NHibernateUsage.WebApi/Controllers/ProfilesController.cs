@@ -2,21 +2,45 @@
 
 [ApiController]
 [Route("api/[controller]")]
-public class TestController : ControllerBase
+public class ProfilesController : ControllerBase
 {
     private readonly ISessionFactory _sessionFactory;
 
-    public TestController()
+    public ProfilesController()
     {
         _sessionFactory = NHibernateHelper.CreateSessionFactory();
     }
 
+    // Tüm profilleri listeleyen uç nokta
     [HttpGet]
-    public async Task<IActionResult> Get()
+    [Route("")]
+    public IActionResult GetProfiles()
     {
-        await Task.CompletedTask;
+        using (var session = _sessionFactory.OpenSession())
+        using (var transaction = session.BeginTransaction())
+        {
+            // Tüm profilleri sorgulama
+            var profiles = session.Query<CrdCardMiscAuthProfileDef>().ToList();
+            transaction.Commit(); // Sorgunun sonunda işlemi onayla (commit)
+            return Ok(profiles);
+        }
+    }
 
-        return Ok();
+
+    // Belirli bir id'ye göre profil getiren uç nokta
+    [HttpGet]
+    [Route("{id}")]
+    public IActionResult GetProfileById(Guid id)
+    {
+        using (var session = _sessionFactory.OpenSession())
+        {
+            var profile = session.Get<CrdCardMiscAuthProfileDef>(id);
+            if (profile == null)
+            {
+                return NotFound();
+            }
+            return Ok(profile);
+        }
     }
 
     [HttpPost]

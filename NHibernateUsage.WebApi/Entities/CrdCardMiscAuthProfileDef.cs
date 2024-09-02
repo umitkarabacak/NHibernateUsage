@@ -2,9 +2,9 @@
 
 public class CrdCardMiscAuthProfileDef
 {
-    public Guid Guid { get; set; }
-    public string Description { get; set; }
-    public bool IsValid { get; set; }
-    public int Code { get; set; }
-    public CrdCardMiscAuthProfileDet CrdCardMiscAuthProfileDet { get; set; }
+    public virtual Guid Guid { get; set; }
+    public virtual string Description { get; set; }
+    public virtual bool IsValid { get; set; }
+    public virtual int Code { get; set; }
+    public virtual CrdCardMiscAuthProfileDet CrdCardMiscAuthProfileDet { get; set; }
 }
