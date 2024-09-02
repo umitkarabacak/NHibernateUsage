@@ -49,6 +49,7 @@ public class ProfilesController : ControllerBase
     {
         using (var transaction = _session.BeginTransaction())
         {
+            // Yeni profil nesnesi oluştur
             var profile = new CrdCardMiscAuthProfileDef
             {
                 Guid = Guid.NewGuid(),
@@ -57,6 +58,10 @@ public class ProfilesController : ControllerBase
                 IsValid = true,
             };
 
+            // İlk olarak ana varlığı kaydet
+            _session.Save(profile);
+
+            // Yeni profil detayı nesnesi oluştur
             var profileDetail = new CrdCardMiscAuthProfileDet
             {
                 CardMiscAuthProfileGuid = profile.Guid,
@@ -64,12 +69,19 @@ public class ProfilesController : ControllerBase
                 CrdCardMiscAuthProfileDef = profile
             };
 
+            // Sonra bağlı varlığı kaydet
+            _session.Save(profileDetail);
+
+            // Profil ve profil detayı arasındaki ilişkiyi kur
             profile.CrdCardMiscAuthProfileDet = profileDetail;
 
-            _session.Save(profile);
+            //_session.Save(profile);
+
+            // İşlemi onayla (commit)
             transaction.Commit();
 
             return Ok(profile);
         }
     }
+
 }
