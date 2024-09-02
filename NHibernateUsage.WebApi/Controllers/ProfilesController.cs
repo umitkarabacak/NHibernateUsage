@@ -20,28 +20,20 @@ public class ProfilesController : ControllerBase
     [Route("")]
     public IActionResult GetProfiles()
     {
-        using (var transaction = _session.BeginTransaction())
-        {
-            var profiles = _session.Query<CrdCardMiscAuthProfileDef>().ToList();
-            transaction.Commit();
-            return Ok(profiles);
-        }
+        var profiles = _session.Query<CrdCardMiscAuthProfileDef>().ToList();
+
+        return Ok(profiles);
     }
 
     [HttpGet]
     [Route("{id}")]
     public IActionResult GetProfileById(Guid id)
     {
-        using (var transaction = _session.BeginTransaction())
-        {
-            var profile = _session.Get<CrdCardMiscAuthProfileDef>(id);
-            if (profile == null)
-            {
-                return NotFound();
-            }
-            transaction.Commit();
-            return Ok(profile);
-        }
+        var profile = _session.Get<CrdCardMiscAuthProfileDef>(id);
+        if (profile == null)
+            return NotFound();
+
+        return Ok(profile);
     }
 
     [HttpPost]
@@ -75,13 +67,10 @@ public class ProfilesController : ControllerBase
             // Profil ve profil detayı arasındaki ilişkiyi kur
             profile.CrdCardMiscAuthProfileDet = profileDetail;
 
-            //_session.Save(profile);
-
             // İşlemi onayla (commit)
             transaction.Commit();
 
             return Ok(profile);
         }
     }
-
 }
