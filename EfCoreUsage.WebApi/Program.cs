@@ -1,4 +1,4 @@
-var builder = WebApplication.CreateBuilder(args);
+﻿var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
       .AddJsonOptions(options =>
@@ -12,6 +12,13 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseInMemoryDatabase(nameof(ApplicationDbContext))
     );
+
+//cmd on project folder => dotnet add package Microsoft.EntityFrameworkCore.Proxies
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//        options.UseInMemoryDatabase(nameof(ApplicationDbContext))
+//    )
+//    .UseLazyLoadingProxies()); // Lazy loading proxy kullanımı
+
 
 var app = builder.Build();
 

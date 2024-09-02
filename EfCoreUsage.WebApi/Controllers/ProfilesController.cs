@@ -2,23 +2,16 @@
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProfilesController : ControllerBase
+public class ProfilesController(ApplicationDbContext context) : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
-
-    public ProfilesController(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     [HttpGet]
     [Route("")]
     public IActionResult GetProfiles()
     {
-        var profiles = _context.CrdCardMiscAuthProfileDefs.ToList();
-
-        if (!profiles.Any())
-            return Ok(new { Message = "No profiles found." });
+        // Eager loading kullanarak ilişkili varlığı dahil et
+        var profiles = context.CrdCardMiscAuthProfileDefs
+            .Include(p => p.CrdCardMiscAuthProfileDet) // İlişkili varlığı yükle
+            .ToList();
 
         return Ok(profiles);
     }
@@ -27,7 +20,11 @@ public class ProfilesController : ControllerBase
     [Route("{id}")]
     public IActionResult GetProfileById(Guid id)
     {
-        var profile = _context.CrdCardMiscAuthProfileDefs.Find(id);
+        // Eager loading kullanarak ilişkili varlığı dahil et
+        var profile = context.CrdCardMiscAuthProfileDefs
+            .Include(p => p.CrdCardMiscAuthProfileDet) // İlişkili varlığı yükle
+            .FirstOrDefault(p => p.Guid == id);
+
         if (profile == null)
             return NotFound();
 
@@ -47,7 +44,7 @@ public class ProfilesController : ControllerBase
         };
 
         // İlk olarak ana varlığı kaydet
-        _context.CrdCardMiscAuthProfileDefs.Add(profile);
+        context.CrdCardMiscAuthProfileDefs.Add(profile);
 
         // Yeni profil detayı nesnesi oluştur
         var profileDetail = new CrdCardMiscAuthProfileDet
@@ -58,13 +55,13 @@ public class ProfilesController : ControllerBase
         };
 
         // Sonra bağlı varlığı kaydet
-        _context.CrdCardMiscAuthProfileDets.Add(profileDetail);
+        context.CrdCardMiscAuthProfileDets.Add(profileDetail);
 
         // Profil ve profil detayı arasındaki ilişkiyi kur
         profile.CrdCardMiscAuthProfileDet = profileDetail;
 
         // Veritabanına kaydet
-        _context.SaveChanges();
+        context.SaveChanges();
 
         return Ok(profile);
     }
